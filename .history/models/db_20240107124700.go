@@ -1,0 +1,32 @@
+package models
+
+import (
+	"os"
+
+	"gorm.io/driver/sqlite"
+	"gorm.io/gorm"
+)
+
+var DB *gorm.DB
+
+func ConnectDB() {
+	dbType := "sqlite"
+
+	if os.Getenv("db_memory") != "" {
+		dbType += ":memory:"
+	} else {
+		dbType += ":./database.db"
+	}
+
+	db, err := gorm.Open(sqlite.Open(dbType), &gorm.Config{})
+	if err != nil {
+		panic("Error al conectar a la base de datos: " + err.Error())
+	}
+
+	err = db.AutoMigrate(&User{}) // Agrega tus modelos aquí
+	if err != nil {
+		panic("Error al ejecutar migraciones: " + err.Error())
+	}
+
+	DB = db
+}
